@@ -33,7 +33,14 @@
 #ifndef TeensyUserInterface_h
 #define TeensyUserInterface_h
 
+#if __has_include("ILI9341_t3.h")
 #include <ILI9341_t3.h>
+#elif __has_include("ST7796_t3.h")
+#include <ST7796_t3.h>
+#define ILI9341_t3 ST7796_t3
+#elif __has_include("ILI9488_t3.h")
+#define ILI9341_t3 ILI9488_t3
+#endif
 
 
 //
@@ -357,6 +364,7 @@ class TeensyUserInterface
     int touchScreenToLCDOffsetY;
     float touchScreenToLCDScalerY;
     int touchState;
+    int touchOrient;
 
 
     //

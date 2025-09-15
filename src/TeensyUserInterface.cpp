@@ -159,8 +159,24 @@
 // ---------------------------------------------------------------------------------
 
 #include <EEPROM.h>
+
+#if __has_include("ILI9341_t3.h")
 #include <ILI9341_t3.h>
+#elif __has_include("ST7796_t3.h")
+#include <ST7796_t3.h>
+#define ILI9341_t3 ST7796_t3
+#elif __has_include("ILI9488_t3.h")
+#define ILI9341_t3 ILI9488_t3
+#endif
+
+#if __has_include("XPT2046_Touchscreen.h")
 #include <XPT2046_Touchscreen.h>
+#define TOUCH_MAP
+#elif __has_include("Adafruit_FT6206.h")
+#include <Adafruit_FT6206.h>
+#define XPT2046_Touchscreen Adafruit_FT6206
+#define TOUCH_PIXEL
+#endif
 #include "TeensyUserInterface.h"
 
 
@@ -204,8 +220,16 @@ void TeensyUserInterface::begin(int lcdCSPin, int LcdDCPin, int TouchScreenCSPin
   //
   // create the LCD and touchscreen objects
   //
+#if __has_include("ST7796_t3.h")
+  lcd = new ST7796_t3(lcdCSPin, LcdDCPin);
+#else
   lcd = new ILI9341_t3(lcdCSPin, LcdDCPin);
+#endif
+#if __has_include("Adafruit_FT6206.h")
+  ts = new Adafruit_FT6206();
+#elif __has_include("XPT2046_Touchscreen.h")
   ts = new XPT2046_Touchscreen(TouchScreenCSPin);
+#endif
   
   //
   // initialize the LCD and touch screen hardware
@@ -2628,7 +2652,12 @@ const long TOUCH_AUTO_REPEAT_RATE = 120;
 //
 void TeensyUserInterface::touchScreenInitialize(int lcdOrientation)
 {
+#if __has_include("Adafruit_FT6206.h")
+  ts->begin(40);
+#elif __has_include("XPT2046_Touchscreen.h")
   ts->begin();
+#endif
+
   touchScreenSetOrientation(lcdOrientation);
 }
 
@@ -2641,8 +2670,10 @@ void TeensyUserInterface::touchScreenInitialize(int lcdOrientation)
 //
 void TeensyUserInterface::touchScreenSetOrientation(int lcdOrientation)
 {
+#ifdef TOUCH_MAP
   ts->setRotation((lcdOrientation + 2) % 4);
   setDefaultTouchScreenCalibrationConstants(lcdOrientation);
+#endif
   touchState = WAITING_FOR_TOUCH_DOWN_STATE;
 }
 
@@ -2920,11 +2951,47 @@ boolean TeensyUserInterface::getTouchScreenCoords(int *xLCD, int *yLCD)
   //
   // convert the coordinates into LCD space
   //
+#ifdef TOUCH_MAP
   int x = (int)((float)xRaw / touchScreenToLCDScalerX) - touchScreenToLCDOffsetX;
   *xLCD = constrain(x, 0, lcdWidth - 1);
 
   int y = (int)((float)yRaw / touchScreenToLCDScalerY) - touchScreenToLCDOffsetY;
   *yLCD = constrain(y, 0, lcdHeight - 1);
+#endif
+
+#ifdef TOUCH_PIXEL
+  switch(touchOrient)
+  {
+    case LCD_ORIENTATION_PORTRAIT_4PIN_TOP:
+    {
+      *xLCD = xRaw;
+      *yLCD = yRaw;
+      break;
+    }
+    
+    case LCD_ORIENTATION_LANDSCAPE_4PIN_LEFT:
+    {
+      *xLCD = yRaw;
+      *yLCD = lcdHeight - xRaw;
+      break;
+    }
+    
+    case LCD_ORIENTATION_PORTRAIT_4PIN_BOTTOM:
+    {
+      *xLCD = lcdWidth - xRaw;
+      *yLCD = lcdHeight - yRaw;
+      break;
+    }
+    
+    case LCD_ORIENTATION_LANDSCAPE_4PIN_RIGHT:
+    default:
+    {
+      *xLCD = lcdWidth - yRaw;
+      *yLCD = xRaw;
+      break;
+    }
+  }
+#endif
 
   return(true);
 }
@@ -2948,7 +3015,6 @@ boolean TeensyUserInterface::getRAWTouchScreenCoords(int *xRaw, int *yRaw)
   // get the raw coordinates and return them
   //
   TS_Point rawTouchPoint = ts->getPoint();
-
   *xRaw = rawTouchPoint.x;
   *yRaw = rawTouchPoint.y;
   return(true);
@@ -2967,11 +3033,17 @@ boolean TeensyUserInterface::getRAWTouchScreenCoords(int *xRaw, int *yRaw)
 //
 void TeensyUserInterface::lcdInitialize(int lcdOrientation, const ui_font &font)
 {
+#if __has_include("ST7796_t3.h")
+  lcd->init(320, 480);
+  lcd->invertDisplay(true); 
+#else
   lcd->begin();
+#endif
   lcdSetOrientation(lcdOrientation);
   lcdClearScreen(LCD_BLACK);
   lcdSetFontColor(LCD_WHITE);  
   lcdSetFont(font);
+  touchOrient = lcdOrientation;
 }
 
 
@@ -3487,7 +3559,7 @@ byte TeensyUserInterface::readConfigurationByte(int EEPromAddress, byte defaultV
 {
   if (EEPROM.read(EEPromAddress) == 0xff)
     return(defaultValue);
-	
+  else
     return(EEPROM.read(EEPromAddress + 1));
 }
 

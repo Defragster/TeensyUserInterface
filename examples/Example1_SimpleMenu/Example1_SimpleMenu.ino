@@ -48,10 +48,11 @@
 
 // ***********************************************************************
 
+#include <ILI9341_t3.h>
+#include <XPT2046_Touchscreen.h>
 #include <TeensyUserInterface.h>
 #include <font_Arial.h>
 #include <font_ArialBold.h>
-
 
 //
 // create the user interface object
