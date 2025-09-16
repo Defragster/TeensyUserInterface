@@ -25,7 +25,6 @@
 #include <Adafruit_FT6206.h>
 #include <TeensyUserInterface.h>
 
-
 //
 // create the user interface object
 //
@@ -44,7 +43,7 @@ void setup()
   //
   const int LCD_CS_PIN = 10;
   const int LCD_DC_PIN = 9;
-  const int TOUCH_CS_PIN = 41;
+  const int TOUCH_CS_PIN = 41; // 8
   
   //
   // setup the LCD orientation, the default font and initialize the user interface
