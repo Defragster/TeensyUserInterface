@@ -3657,6 +3657,17 @@ void TeensyUserInterface::lcdSetOrientation(int lcdOrientation)
 }
 
 
+//
+// invert display
+//
+void TeensyUserInterface::invertDisplay(bool invert)
+{
+  if(invert) {
+    lcd->invertDisplay(true);
+  } else {
+    lcd->invertDisplay(false);
+  }
+}
 
 //
 // fill the entire lcd screen with the given color

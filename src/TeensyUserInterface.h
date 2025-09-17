@@ -215,7 +215,6 @@ const byte MENU_ITEM_TYPE_END_OF_MENU      = 5;
 #define MENU_COLUMNS_3  ((void (*)()) 3)
 #define MENU_COLUMNS_4  ((void (*)()) 4)
 
-
 //
 // types of touch events
 //
@@ -310,6 +309,8 @@ class TeensyUserInterface
     void setDefaultTouchScreenCalibrationConstants(int lcdOrientation);
     void setTouchScreenCalibrationConstants(int tsToLCDOffsetX_low, int tsToLCDOffsetX_high, int tsToLCDOffsetY_low, int tsToLCDOffsetY_high);
     boolean getTouchScreenCoords(int *xLCD, int *yLCD);
+
+    void invertDisplay(bool invert);
 
     void lcdClearScreen(uint16_t color);
     void lcdDrawPixel(int x, int y, uint16_t color);
