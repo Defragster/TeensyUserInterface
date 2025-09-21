@@ -3630,7 +3630,6 @@ void TeensyUserInterface::lcdInitialize(int lcdOrientation, const ui_font &font)
 {
 #if __has_include("ST7796_t3.h")
   lcd->init(320, 480);
-  lcd->invertDisplay(true); 
 #else
   lcd->begin();
 #endif
