@@ -78,6 +78,7 @@ void setup()
   // setup the LCD orientation, the default font and initialize the user interface
   //
   ui.begin(LCD_CS_PIN, LCD_DC_PIN, TOUCH_CS_PIN, LCD_ORIENTATION_LANDSCAPE_4PIN_RIGHT, Arial_9_Bold);
+  ui.invertDisplay(true);
   ui.setTouchScreenCalibrationConstants(150, 3921, 206, 3934);
 
 }
